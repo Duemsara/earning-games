@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ល្បែងសិក្សាសាលាស្រែរាជ | ស្រែរាជ Learning Games</title>
+  <meta name="description" content="កម្មវិធីល្បែងសិក្សាអន្តរកម្មទំនើបសម្រាប់សិស្សានុសិស្ស - Wordwall style interactive educational games for Cambodian schools">
+  
+  <!-- Google Fonts: Moul (Header/Khmer Title), Kantumruy Pro (Modern Khmer Body/UI), Plus Jakarta Sans (English/Numbers) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:ital,wght@0,300..700;1,300..700&family=Moul&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- PDF.js CDN for Client-side PDF Reading & Rendering for Vision OCR -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    if (window.pdfjsLib) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  </script>
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/games.css">
+</head>
+<body data-theme="jungle">
+  <!-- Dynamic Animated Background Canvas & Overlay -->
+  <div class="bg-effects-layer">
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <!-- Fullscreen Particle Canvas for Confetti -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- App Main Wrapper -->
+  <div id="app" class="app-container">
+    
+    <!-- Top Navigation Bar -->
+    <header class="app-navbar glass-card">
+      <div class="navbar-left">
+        <div class="brand-logo-wrap" id="btn-brand-home">
+          <div class="brand-badge-icon">🏛️</div>
+          <div class="brand-text">
+            <h1 class="brand-title" data-i18n="app_title">ល្បែងសិក្សាសាលាស្រែរាជ</h1>
+            <span class="brand-subtitle" data-i18n="app_subtitle">ស្រែរាជ Learning Games</span>
+          </div>
+        </div>
+
+        <!-- Activity Selector Dropdown Trigger -->
+        <button id="btn-activity-dropdown" class="nav-activity-pill glass-btn" title="ជ្រើសរើសមេរៀន / Choose Lesson">
+          <span class="pill-icon">📖</span>
+          <span id="nav-current-activity-title" class="pill-label">សត្វព្រៃ និងលក្ខណៈសម្គាល់</span>
+          <span class="pill-arrow">▼</span>
+        </button>
+      </div>
+
+      <div class="navbar-right">
+        <!-- Language Switcher -->
+        <button id="btn-lang-toggle" class="nav-btn glass-btn" title="ប្តូរភាសា / Switch Language">
+          <span class="lang-flag">🇰🇭</span>
+          <span class="lang-code font-en">ភាសាខ្មែរ</span>
+        </button>
+
+        <!-- Theme Selector Dropdown -->
+        <div class="theme-selector-wrap">
+          <button id="btn-theme-selector" class="nav-btn glass-btn" title="ប្តូររូបរាង / Switch Theme">
+            <span class="theme-icon">🌿</span>
+            <span class="theme-name" data-i18n="theme_jungle">Jungle Forest</span>
+            <span class="pill-arrow">▼</span>
+          </button>
+          <div id="theme-dropdown-menu" class="dropdown-menu glass-card hidden">
+            <button class="theme-option" data-theme="classic"><span class="opt-icon">🎨</span> <span data-i18n="theme_classic">Classic Colorful</span></button>
+            <button class="theme-option" data-theme="space"><span class="opt-icon">🚀</span> <span data-i18n="theme_space">Cosmic Space</span></button>
+            <button class="theme-option" data-theme="jungle"><span class="opt-icon">🌿</span> <span data-i18n="theme_jungle">Jungle Forest</span></button>
+            <button class="theme-option" data-theme="neon"><span class="opt-icon">⚡</span> <span data-i18n="theme_neon">Arcade Neon</span></button>
+          </div>
+        </div>
+
+        <!-- Sound Toggle -->
+        <button id="btn-sound-toggle" class="icon-btn glass-btn" title="បិទ/បើកសម្លេង (Mute/Unmute Sound)">
+          <span id="sound-icon">🔊</span>
+        </button>
+
+        <!-- Fullscreen Toggle -->
+        <button id="btn-fullscreen-toggle" class="icon-btn glass-btn" title="ពង្រីកពេញអេក្រង់ (Fullscreen)">
+          <span id="fullscreen-icon">⛶</span>
+        </button>
+
+        <!-- Quick AI Generator -->
+        <button id="btn-nav-ai" class="nav-btn gradient-btn-ai pulse-glow">
+          <span class="btn-icon">✨</span>
+          <span data-i18n="nav_ai_generator">AI Generator</span>
+        </button>
+
+        <!-- Activity Manager Library Button -->
+        <button id="btn-nav-library" class="nav-btn glass-btn">
+          <span class="btn-icon">📚</span>
+          <span data-i18n="nav_activity_manager">បញ្ជីមេរៀន</span>
+        </button>
+
+        <!-- Create New Activity Button -->
+        <button id="btn-nav-create" class="nav-btn primary-btn">
+          <span class="btn-icon">➕</span>
+          <span data-i18n="nav_create_activity">បង្កើតថ្មី</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Game Switcher Bar (Wordwall Style 7 Interactive Game Engines) -->
+    <section class="game-engines-bar glass-card">
+      <div class="engines-bar-header">
+        <div class="engines-title-wrap">
+          <span class="icon">🎮</span>
+          <span class="title" data-i18n="game_templates_title">ទម្រង់ហ្គេម (Game Templates)</span>
+        </div>
+        <span class="engines-subtitle" data-i18n="game_templates_subtitle">ចុចប្តូរប្រភេទល្បែងលើទិន្នន័យមេរៀនតែមួយ</span>
+      </div>
+
+      <div class="game-engines-grid" id="game-engines-nav">
+        <!-- 1. Matching Pairs -->
+        <button class="engine-tab-btn active" data-engine="pairs">
+          <div class="engine-icon-badge">🎴</div>
+          <span class="engine-name" data-i18n="engine_pairs">Matching Pairs</span>
+        </button>
+
+        <!-- 2. Match Up -->
+        <button class="engine-tab-btn" data-engine="match">
+          <div class="engine-icon-badge">🧩</div>
+          <span class="engine-name" data-i18n="engine_match">Match Up</span>
+        </button>
+
+        <!-- 3. Quiz Gameshow -->
+        <button class="engine-tab-btn" data-engine="quiz">
+          <div class="engine-icon-badge">🎯</div>
+          <span class="engine-name" data-i18n="engine_quiz">Quiz Gameshow</span>
+        </button>
+
+        <!-- 4. Open The Box -->
+        <button class="engine-tab-btn" data-engine="box">
+          <div class="engine-icon-badge">📦</div>
+          <span class="engine-name" data-i18n="engine_box">Open The Box</span>
+        </button>
+
+        <!-- 5. Random Wheel -->
+        <button class="engine-tab-btn" data-engine="wheel">
+          <div class="engine-icon-badge">🎡</div>
+          <span class="engine-name" data-i18n="engine_wheel">Random Wheel</span>
+        </button>
+
+        <!-- 6. Word Search -->
+        <button class="engine-tab-btn" data-engine="wordsearch">
+          <div class="engine-icon-badge">🔠</div>
+          <span class="engine-name" data-i18n="engine_wordsearch">Word Search</span>
+        </button>
+
+        <!-- 7. Whack-a-Mole -->
+        <button class="engine-tab-btn" data-engine="whack">
+          <div class="engine-icon-badge">🐹</div>
+          <span class="engine-name" data-i18n="engine_whack">Whack-a-Mole</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Activity Info Header -->
+    <section class="activity-header glass-card">
+      <div class="activity-header-left">
+        <div class="activity-title-group">
+          <span id="current-activity-emoji" class="activity-main-emoji">🦁</span>
+          <h2 id="current-activity-title" class="activity-main-title">សត្វព្រៃ និងលក្ខណៈសម្គាល់</h2>
+        </div>
+        <p id="current-activity-desc" class="activity-main-desc">ស្វែងយល់ពីសត្វព្រៃ សំឡេង និងចំណុចសម្គាល់របស់ពួកវា</p>
+      </div>
+      <div class="activity-header-right">
+        <div class="badge subject-badge" id="current-activity-subject">
+          <span class="badge-icon">🏷️</span>
+          <span id="current-activity-subject-text">វិទ្យាសាស្ត្រ និងធម្មជាតិ</span>
+        </div>
+        <div class="badge items-count-badge">
+          <span class="badge-icon">🔢</span>
+          <span id="current-activity-count">8 ធាតុ</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Game Play Arena -->
+    <main class="game-stage-container glass-card" id="game-stage-container">
+      <!-- In-Game HUD Bar (Dynamic based on Engine) -->
+      <div class="game-hud-bar" id="game-hud-bar">
+        <div class="hud-left" id="hud-left-stats">
+          <!-- e.g. Score, Pairs found, Timer -->
+        </div>
+        <div class="hud-center" id="hud-center-stats">
+          <!-- Streaks, Combos, Lives -->
+        </div>
+        <div class="hud-right" id="hud-right-controls">
+          <button id="btn-hud-restart" class="hud-btn glass-btn" title="លេងឡើងវិញ (Restart)">
+            <span>🔄</span> <span data-i18n="hud_restart">លេងឡើងវិញ</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Game Viewport Mount -->
+      <div class="game-viewport" id="game-viewport">
+        <!-- Rendered dynamically by current active game engine -->
+      </div>
+    </main>
+
+    <!-- Bottom In-Game Action Toolbar -->
+    <footer class="game-action-toolbar glass-card">
+      <div class="toolbar-left">
+        <button id="btn-action-ai" class="toolbar-btn gradient-btn-ai">
+          <span>✨</span> <span data-i18n="btn_ai_generate">AI Generator</span>
+        </button>
+        <button id="btn-action-edit" class="toolbar-btn glass-btn">
+          <span>✏️</span> <span data-i18n="btn_edit_content">កែសម្រួល</span>
+        </button>
+        <button id="btn-action-duplicate" class="toolbar-btn glass-btn">
+          <span>📋</span> <span data-i18n="btn_duplicate">ចម្លងមេរៀន</span>
+        </button>
+        <button id="btn-action-delete" class="toolbar-btn danger-btn hidden">
+          <span>🗑️</span> <span data-i18n="btn_delete_activity">លុបមេរៀន</span>
+        </button>
+      </div>
+
+      <div class="toolbar-center">
+        <div class="author-credits">
+          <span class="author-label" data-i18n="author_created_by">បង្កើតដោយ៖</span>
+          <strong class="author-name">លោកគ្រូ ឌឹម សារ៉ា</strong>
+        </div>
+      </div>
+
+      <div class="toolbar-right">
+        <button id="btn-action-shuffle" class="toolbar-btn glass-btn">
+          <span>🔀</span> <span data-i18n="btn_shuffle">ច្របល់</span>
+        </button>
+        <button id="btn-action-reset-data" class="toolbar-btn glass-btn" title="ផ្ទុកទិន្នន័យគំរូឡើងវិញ (Reload Default Samples)">
+          <span>📋</span> <span data-i18n="btn_default_data">ទិន្នន័យគំរូ</span>
+        </button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- 1. Creator Studio Modal -->
+  <div id="modal-creator" class="modal-overlay hidden">
+    <div class="modal-window glass-card creator-modal-window">
+      <div class="modal-header">
+        <div class="modal-header-title">
+          <span class="modal-header-icon">✏️</span>
+          <div>
+            <h3 id="creator-modal-title" data-i18n="creator_title">ស្ទូឌីយោបង្កើតមេរៀន (Creator Studio)</h3>
+            <p class="modal-subtitle" data-i18n="creator_subtitle">បង្កើត និងកែសម្រួលល្បែងសិក្សាផ្ទាល់ខ្លួនរបស់អ្នក</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" data-close-modal="modal-creator">&times;</button>
+      </div>
+
+      <div class="modal-body creator-modal-body">
+        <!-- Metadata Section -->
+        <div class="creator-meta-grid">
+          <div class="form-group">
+            <label class="form-label" data-i18n="creator_activity_title">ចំណងជើងមេរៀន *</label>
+            <div class="input-with-emoji">
+              <input type="text" id="creator-emoji" class="form-input emoji-input" value="📚" maxlength="4">
+              <input type="text" id="creator-title" class="form-input" placeholder="ឧ. សត្វព្រៃ និងលក្ខណៈសម្គាល់" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" data-i18n="creator_subject">មុខវិជ្ជា / ប្រធានបទ</label>
+            <input type="text" id="creator-subject" class="form-input" placeholder="ឧ. ភាសាខ្មែរ, វិទ្យាសាស្ត្រ, គណិតវិទ្យា">
+          </div>
+
+          <div class="form-group span-full">
+            <label class="form-label" data-i18n="creator_desc">ការពិពណ៌នាសង្ខេប</label>
+            <input type="text" id="creator-desc" class="form-input" placeholder="ការណែនាំពីរបៀបលេង ឬខ្លឹមសារមេរៀន">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" data-i18n="creator_default_template">ទម្រង់លំនាំដើម</label>
+            <select id="creator-default-template" class="form-select">
+              <option value="pairs">🎴 Matching Pairs</option>
+              <option value="match">🧩 Match Up</option>
+              <option value="quiz">🎯 Quiz Gameshow</option>
+              <option value="box">📦 Open The Box</option>
+              <option value="wheel">🎡 Random Wheel</option>
+              <option value="wordsearch">🔠 Word Search</option>
+              <option value="whack">🐹 Whack-a-Mole</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" data-i18n="creator_timer_seconds">កំណត់ពេល (វិនាទី)</label>
+            <input type="number" id="creator-timer" class="form-input" min="0" max="600" value="60" placeholder="0 = គ្មានកំណត់">
+          </div>
+        </div>
+
+        <!-- Items Table / Dual-Card Rows -->
+        <div class="creator-items-header">
+          <h4 data-i18n="creator_items_heading">បញ្ជីសំណួរ & ចម្លើយ / គូផ្គូផ្គង (Items List)</h4>
+          <div class="items-header-actions">
+            <button id="btn-creator-import-json" class="glass-btn btn-sm">
+              <span>📥</span> <span data-i18n="btn_import_json">Import JSON</span>
+            </button>
+            <button id="btn-creator-export-json" class="glass-btn btn-sm">
+              <span>📤</span> <span data-i18n="btn_export_json">Export JSON</span>
+            </button>
+            <input type="file" id="creator-file-input" accept=".json" class="hidden">
+          </div>
+        </div>
+
+        <div id="creator-items-container" class="creator-items-container">
+          <!-- Dynamic Items rows appended here -->
+        </div>
+
+        <button id="btn-creator-add-row" class="btn-add-item-row">
+          <span>➕</span> <span data-i18n="creator_add_item">បន្ថែមសំណួរ/ធាតុថ្មី (Add New Item)</span>
+        </button>
+      </div>
+
+      <div class="modal-footer">
+        <button class="glass-btn" data-close-modal="modal-creator" data-i18n="btn_cancel">បោះបង់</button>
+        <button id="btn-creator-save" class="primary-btn">
+          <span>💾</span> <span data-i18n="btn_save_activity">រក្សាទុកមេរៀន</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. AI Question Generator Modal (Multimodal BYOK) -->
+  <div id="modal-ai-generator" class="modal-overlay hidden">
+    <div class="modal-window glass-card ai-modal-window">
+      <div class="modal-header">
+        <div class="modal-header-title">
+          <span class="modal-header-icon">✨</span>
+          <div>
+            <h3 data-i18n="ai_modal_title">AI Question Generator (Google Gemini Multimodal)</h3>
+            <p class="modal-subtitle" data-i18n="ai_modal_subtitle">បង្កើតមេរៀនស្វ័យប្រវត្តិតាម AI ឬឯកសារ PDF សៀវភៅពុម្ព</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" data-close-modal="modal-ai-generator">&times;</button>
+      </div>
+
+      <div class="modal-body ai-modal-body">
+        <!-- BYOK API Key Bar -->
+        <div class="ai-api-key-card glass-card">
+          <div class="api-key-header">
+            <div class="api-key-label-wrap">
+              <span class="key-icon">🔑</span>
+              <strong>Google Gemini API Key (BYOK)</strong>
+              <span class="badge-free">ឥតគិតថ្លៃ (Free)</span>
+            </div>
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="link-get-key">
+              <span data-i18n="ai_get_free_key">យក Key ឥតគិតថ្លៃនៅទីនេះ ↗</span>
+            </a>
+          </div>
+          <div class="api-key-input-row">
+            <input type="password" id="ai-api-key-input" class="form-input" placeholder="បិទភ្ជាប់ Google AI Studio API Key (AIzaSy...)">
+            <button id="btn-ai-save-key" class="glass-btn">
+              <span>💾</span> <span data-i18n="btn_save_key">រក្សាទុក Key</span>
+            </button>
+            <button id="btn-ai-test-key" class="glass-btn">
+              <span>⚡</span> <span data-i18n="btn_test_key">សាកល្បង</span>
+            </button>
+          </div>
+          <div id="ai-key-status" class="api-key-status"></div>
+        </div>
+
+        <!-- 3 Multimodal Input Tabs -->
+        <div class="ai-input-tabs">
+          <button class="ai-tab-btn active" data-ai-tab="prompt">
+            <span>📝</span> <span data-i18n="ai_tab_topic">ប្រធានបទ / Topic</span>
+          </button>
+          <button class="ai-tab-btn" data-ai-tab="pdf">
+            <span>📄</span> <span data-i18n="ai_tab_pdf">ឯកសារ PDF / សៀវភៅពុម្ព</span>
+          </button>
+          <button class="ai-tab-btn" data-ai-tab="image">
+            <span>🖼️</span> <span data-i18n="ai_tab_image">រូបថតសៀវភៅពុម្ព / Textbook Photo</span>
+          </button>
+        </div>
+
+        <!-- Tab 1: Topic Prompt -->
+        <div id="ai-tab-pane-prompt" class="ai-tab-pane active">
+          <div class="form-group">
+            <label class="form-label" data-i18n="ai_prompt_label">បញ្ចូលប្រធានបទ ឬខ្លឹមសារមេរៀនដែលចង់បង្កើត</label>
+            <textarea id="ai-text-prompt" class="form-textarea" rows="3" placeholder="ឧ. បង្កើតសំណួរវិទ្យាសាស្ត្រថ្នាក់ទី៥ អំពីសត្វឆ្អឹងកង និងសត្វឥតឆ្អឹងកង..."></textarea>
+          </div>
+          <div class="ai-presets-wrap">
+            <span class="presets-label" data-i18n="ai_quick_presets">គំរូប្រធានបទរហ័ស៖</span>
+            <div class="preset-chips">
+              <button class="preset-chip" data-preset="animals">🦁 សត្វព្រៃកម្ពុជា</button>
+              <button class="preset-chip" data-preset="fox-story">📖 រឿងកញ្ជ្រោង និងមាន់ចែ</button>
+              <button class="preset-chip" data-preset="khmer-history">🏛️ ប្រវត្តិសាស្ត្រ & ប្រាសាទខ្មែរ</button>
+              <button class="preset-chip" data-preset="math-grade4">➕ គណិតវិទ្យា គុណចែក</button>
+              <button class="preset-chip" data-preset="khmer-antonyms">🔄 ពាក្យផ្ទុយក្នុងភាសាខ្មែរ</button>
+              <button class="preset-chip" data-preset="english-vocab">🇬🇧 English Animals Vocab</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: PDF Document Reader & OCR -->
+        <div id="ai-tab-pane-pdf" class="ai-tab-pane hidden">
+          <div class="file-upload-dropzone" id="pdf-dropzone">
+            <input type="file" id="ai-pdf-file-input" accept="application/pdf" class="file-input-hidden">
+            <div class="dropzone-content">
+              <div class="dropzone-icon">📄</div>
+              <h4 data-i18n="ai_pdf_upload_title">ជ្រើសរើស ឬទាញទម្លាក់ឯកសារ PDF</h4>
+              <p class="dropzone-desc" data-i18n="ai_pdf_upload_desc">គាំទ្រសៀវភៅពុម្ពក្រសួងអប់រំ និងលំហាត់មេរៀន (ដកស្រង់អត្ថបទ និង OCR ស្វ័យប្រវត្ត)</p>
+              <button type="button" class="glass-btn btn-sm" id="btn-browse-pdf">
+                <span>📁</span> <span data-i18n="btn_browse_file">ជ្រើសរើសឯកសារ</span>
+              </button>
+            </div>
+          </div>
+          <div id="pdf-status-card" class="pdf-status-card hidden">
+            <div class="pdf-status-info">
+              <span class="file-icon">📑</span>
+              <div>
+                <strong id="pdf-filename">document.pdf</strong>
+                <span id="pdf-page-count" class="badge">0 ទំព័រ</span>
+              </div>
+            </div>
+            <div id="pdf-loading-spinner" class="spinner-small hidden"></div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Textbook Image Vision OCR -->
+        <div id="ai-tab-pane-image" class="ai-tab-pane hidden">
+          <div class="file-upload-dropzone" id="image-dropzone">
+            <input type="file" id="ai-image-file-input" accept="image/*" class="file-input-hidden">
+            <div class="dropzone-content">
+              <div class="dropzone-icon">📷</div>
+              <h4 data-i18n="ai_image_upload_title">ថតរូប ឬទម្លាក់រូបភាពទំព័រសៀវភៅពុម្ព</h4>
+              <p class="dropzone-desc" data-i18n="ai_image_upload_desc">AI នឹងអានសំណួរ និងមេរៀនពីរូបភាពដោយស្វ័យប្រវត្តិ</p>
+              <button type="button" class="glass-btn btn-sm" id="btn-browse-image">
+                <span>📸</span> <span data-i18n="btn_browse_image">ជ្រើសរើសរូបថត</span>
+              </button>
+            </div>
+          </div>
+          <div id="image-preview-card" class="image-preview-card hidden">
+            <img id="ai-image-preview" src="" alt="Textbook preview">
+            <button id="btn-remove-image" class="btn-remove-preview">&times;</button>
+          </div>
+        </div>
+
+        <!-- AI Options Grid -->
+        <div class="ai-options-grid">
+          <div class="form-group">
+            <label class="form-label" data-i18n="ai_num_questions">ចំនួនសំណួរ</label>
+            <select id="ai-item-count" class="form-select">
+              <option value="6">6 សំណួរ / គូ</option>
+              <option value="8" selected>8 សំណួរ / គូ</option>
+              <option value="10">10 សំណួរ / គូ</option>
+              <option value="12">12 សំណួរ / គូ</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" data-i18n="ai_difficulty">កម្រិតលំបាក</label>
+            <select id="ai-difficulty" class="form-select">
+              <option value="easy" data-i18n="diff_easy">ងាយស្រួល (បឋមសិក្សា)</option>
+              <option value="medium" selected data-i18n="diff_medium">មធ្យម (អនុវិទ្យាល័យ)</option>
+              <option value="hard" data-i18n="diff_hard">កម្រិតខ្ពស់</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" data-i18n="ai_template_target">ទម្រង់ល្បែងគោលដៅ</label>
+            <select id="ai-target-template" class="form-select">
+              <option value="all">🎮 គាំទ្រគ្រប់ទម្រង់ហ្គេមទាំងអស់</option>
+              <option value="pairs">🎴 Matching Pairs</option>
+              <option value="match">🧩 Match Up</option>
+              <option value="quiz">🎯 Quiz Gameshow</option>
+              <option value="box">📦 Open The Box</option>
+              <option value="wheel">🎡 Random Wheel</option>
+              <option value="wordsearch">🔠 Word Search</option>
+              <option value="whack">🐹 Whack-a-Mole</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- AI Generation Progress & Fallback Info -->
+        <div id="ai-progress-status" class="ai-progress-status hidden">
+          <div class="spinner"></div>
+          <div class="progress-text-wrap">
+            <strong id="ai-progress-title">កំពុងដំណើរការបញ្ញាសិប្បនិម្មិត...</strong>
+            <span id="ai-progress-detail" class="progress-detail">កំពុងវិភាគខ្លឹមសារមេរៀន និងទាញយកគូសំណួរ-ចម្លើយ...</span>
+          </div>
+        </div>
+
+        <!-- AI Generated Questions Review Section -->
+        <div id="ai-results-section" class="ai-results-section hidden">
+          <div class="results-header">
+            <div>
+              <h4 id="ai-results-title">លទ្ធផលសំណួរដែល AI បានបង្កើត</h4>
+              <span id="ai-results-count" class="badge">8 សំណួរ</span>
+            </div>
+          </div>
+          <div id="ai-results-list" class="ai-results-list">
+            <!-- Review cards will be dynamically listed here -->
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="glass-btn" data-close-modal="modal-ai-generator" data-i18n="btn_cancel">បោះបង់</button>
+        <button id="btn-ai-generate-action" class="primary-btn pulse-glow">
+          <span>✨</span> <span data-i18n="btn_generate_now">បង្កើតមេរៀនឥឡូវនេះ</span>
+        </button>
+        <button id="btn-ai-apply-action" class="primary-btn success-btn hidden">
+          <span>🚀</span> <span data-i18n="btn_apply_to_game">ប្រើប្រាស់មេរៀននេះលេងភ្លាម</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Activity Manager (Library) Modal -->
+  <div id="modal-activity-manager" class="modal-overlay hidden">
+    <div class="modal-window glass-card manager-modal-window">
+      <div class="modal-header">
+        <div class="modal-header-title">
+          <span class="modal-header-icon">📚</span>
+          <div>
+            <h3 data-i18n="manager_title">បណ្ណាល័យមេរៀន (Activity Manager)</h3>
+            <p class="modal-subtitle" data-i18n="manager_subtitle">គ្រប់គ្រង និងជ្រើសរើសមេរៀនសម្រាប់លេង ឬកែប្រែ</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" data-close-modal="modal-activity-manager">&times;</button>
+      </div>
+
+      <div class="modal-body manager-modal-body">
+        <!-- Tabs for All, Custom, Samples -->
+        <div class="manager-filter-bar">
+          <div class="filter-tabs">
+            <button class="filter-tab-btn active" data-filter="all">
+              <span data-i18n="filter_all">ទាំងអស់</span> (<span id="count-filter-all">0</span>)
+            </button>
+            <button class="filter-tab-btn" data-filter="custom">
+              <span data-i18n="filter_custom">មេរៀនផ្ទាល់ខ្លួន</span> (<span id="count-filter-custom">0</span>)
+            </button>
+            <button class="filter-tab-btn" data-filter="samples">
+              <span data-i18n="filter_samples">មេរៀនគំរូប្រព័ន្ធ</span> (<span id="count-filter-samples">0</span>)
+            </button>
+          </div>
+
+          <div class="manager-search-box">
+            <input type="text" id="manager-search-input" class="form-input" placeholder="ស្វែងរកមេរៀន...">
+          </div>
+        </div>
+
+        <!-- Activities Grid List -->
+        <div id="manager-activities-grid" class="manager-activities-grid">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <div class="modal-footer manager-footer">
+        <button id="btn-manager-delete-all-custom" class="danger-btn btn-sm">
+          <span>🗑️</span> <span data-i18n="btn_delete_all_custom">លុបមេរៀនផ្ទាល់ខ្លួនទាំងអស់</span>
+        </button>
+        <div class="footer-spacer"></div>
+        <button class="glass-btn" data-close-modal="modal-activity-manager" data-i18n="btn_close">បិទ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Game Over / Victory Modal -->
+  <div id="modal-game-over" class="modal-overlay hidden">
+    <div class="modal-window glass-card game-over-modal-window">
+      <div class="modal-header result-modal-header">
+        <div class="result-trophy-badge">🏆</div>
+        <h2 id="result-title" class="result-title">អបអរសាទរ! អ្នកបានបញ្ចប់មេរៀន!</h2>
+        <p id="result-subtitle" class="result-subtitle">លទ្ធផលនៃការលេងរបស់អ្នក</p>
+      </div>
+
+      <div class="modal-body result-modal-body">
+        <div class="result-stats-grid">
+          <div class="result-stat-card glass-card">
+            <span class="stat-icon">⭐</span>
+            <span class="stat-label" data-i18n="stat_score">ពិន្ទុ</span>
+            <strong id="result-score" class="stat-val">1000</strong>
+          </div>
+          <div class="result-stat-card glass-card">
+            <span class="stat-icon">⏱️</span>
+            <span class="stat-label" data-i18n="stat_time">រយៈពេល</span>
+            <strong id="result-time" class="stat-val">00:45</strong>
+          </div>
+          <div class="result-stat-card glass-card">
+            <span class="stat-icon">🎯</span>
+            <span class="stat-label" data-i18n="stat_accuracy">ភាពត្រឹមត្រូវ</span>
+            <strong id="result-accuracy" class="stat-val">100%</strong>
+          </div>
+        </div>
+
+        <!-- Review Answers List Toggle -->
+        <div class="result-answers-accordion">
+          <button id="btn-toggle-answers" class="glass-btn btn-full">
+            <span>📋</span> <span data-i18n="btn_show_answers">មើលចម្លើយត្រឹមត្រូវទាំងអស់</span>
+          </button>
+          <div id="result-answers-content" class="result-answers-content hidden">
+            <!-- Dynamic answer pairs list -->
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer result-footer">
+        <button id="btn-result-play-again" class="primary-btn">
+          <span>🔄</span> <span data-i18n="btn_play_again">លេងឡើងវិញ</span>
+        </button>
+        <button id="btn-result-change-template" class="glass-btn">
+          <span>🎮</span> <span data-i18n="btn_try_another_template">សាកល្បងទម្រង់ហ្គេមផ្សេង</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main JavaScript App Entry (Standalone Bundle - Works directly with file:/// and http://) -->
+  <script src="js/app.bundle.js"></script>
+</body>
+</html>
